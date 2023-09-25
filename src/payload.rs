@@ -77,7 +77,7 @@ impl Payload {
         let content = self.content.as_ref().unwrap();
         let avatar = self.avatar_url.as_ref().unwrap();
         format!(
-            r#"{{"content":"{}", "username": "{}", "avatar": "{}"}}"#,
+            r#"{{"content":"{}", "username": "{}", "avatar_url": "{}"}}"#,
             content, self.user_name, avatar
         )
     }
