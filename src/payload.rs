@@ -24,7 +24,6 @@ impl Payload {
         Payload {
             user_name,
             content: None,
-            //     title: None,
             avatar_url: Some(avatar_url),
             end_point: None,
         }
@@ -38,7 +37,6 @@ impl Payload {
             //TODO: replace with unwrap()s with a default behavior incase that field is not parsed from the json
             user_name: v["user_name"].as_str().unwrap().to_owned(),
             content: None,
-            //  title: None,
             avatar_url: Some(v["avatar_url"].as_str().unwrap().to_owned()),
             end_point: Some(v["end_point"].as_str().unwrap().to_owned()),
         }
@@ -58,8 +56,7 @@ impl Payload {
             return Err("No endpoint set");
         }
 
-        // Send
-
+        // Send with reqwest
         let client = reqwest::Client::new();
         let res = client
             .post(self.end_point.as_ref().unwrap()) //safe to unwrap because checked already
