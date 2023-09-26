@@ -45,12 +45,24 @@ impl Payload {
 
         Ok(Payload {
             //TODO: replace with unwrap()s with a default behavior incase that field is not parsed from the json
-            user_name: v["user_name"].as_str().unwrap().to_owned(),
+            user_name: v["user_name"]
+                .as_str()
+                .ok_or("Failed to find user name in json file")?
+                .to_owned(),
             content: None,
-            avatar_url: Some(v["avatar_url"].as_str().unwrap().to_owned()),
-            end_point: Some(v["end_point"].as_str().unwrap().to_owned()),
+            avatar_url: Some(
+                v["avatar_url"]
+                    .as_str()
+                    .map(|s| s.to_owned())
+                    .ok_or("Failed to find avatar_url")?,
+            ),
+            end_point: Some(
+                v["end_point"]
+                    .as_str()
+                    .map(|s| s.to_owned())
+                    .ok_or("Could not find Endpoint in json file")?,
+            ),
         })
-       
     }
 
     pub fn set_content(&mut self, content: String) {
