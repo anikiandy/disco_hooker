@@ -2,6 +2,7 @@
 TODOS:
 1. Change to test file instead of main driver
 2. Replace Unwraps in new_from_json to handle errors
+3. New from json should return a result incase there is a parsing error
 */
 
 use serde::Deserialize;
@@ -30,21 +31,31 @@ impl Payload {
     }
 
     //fn to take a config file to setup the payload with the endpoint and user and user avatar
-    pub fn new_from_json(file_path: &str) -> Payload {
-        let settings = fs::read_to_string(file_path).unwrap();
-        let v: Value = serde_json::from_str(&settings).unwrap();
-        Payload {
+    pub fn new_from_json(file_path: &str) -> Result<Payload, &str> {
+        let v: Value;
+
+        if let Ok(s) = fs::read_to_string(file_path) {
+            v = match serde_json::from_str(&s) {
+                Ok(value) => value,
+                Err(_) => return Err("Failed to parse JSON"),
+            };
+        } else {
+            return Err("Failed to read json");
+        }
+
+        Ok(Payload {
             //TODO: replace with unwrap()s with a default behavior incase that field is not parsed from the json
             user_name: v["user_name"].as_str().unwrap().to_owned(),
             content: None,
             avatar_url: Some(v["avatar_url"].as_str().unwrap().to_owned()),
             end_point: Some(v["end_point"].as_str().unwrap().to_owned()),
-        }
+        })
+       
     }
 
     pub fn set_content(&mut self, content: String) {
         self.content = Some(content);
-    }
+    } //content setter
 
     //send message to discord should return an Error if there is no message
     pub async fn send_msg(&self) -> Result<(), &str> {
@@ -78,5 +89,28 @@ impl Payload {
             r#"{{"title": "TEST", "content":"{}", "username": "{}", "avatar_url": "{}"}}"#,
             content, self.user_name, avatar
         )
+    }
+}
+
+/*
+----- TESTS ------
+*/
+
+#[cfg(test)]
+mod tests {
+    use super::Payload;
+
+    #[test]
+    fn it_works() {
+        let result = 2 + 2;
+        assert_eq!(result, 4);
+    }
+
+    //Create a payload from strings
+    #[test]
+    fn newPayload() {
+        let x = Payload::new("user_name".to_owned(), "avatar_url".to_owned());
+        assert_eq!(x.user_name, "user_name");
+        assert_eq!(x.avatar_url.unwrap(), "avatar_url")
     }
 }
