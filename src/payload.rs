@@ -21,11 +21,11 @@ pub struct Payload {
 impl Payload {
     // Constructor that takes user name and avatar url
     #[allow(dead_code)]
-    pub fn new(user_name: String, avatar_url: String) -> Payload {
+    pub fn new(user_name: &str, avatar_url: &str) -> Payload {
         Payload {
-            user_name,
+            user_name: user_name.to_owned(),
             content: None,
-            avatar_url: Some(avatar_url),
+            avatar_url: Some(avatar_url.to_owned()),
             end_point: None,
         }
     }
@@ -51,10 +51,10 @@ impl Payload {
                 .to_owned(),
             content: None,
             avatar_url: Some(
-                v["avatar_url"]
-                    .as_str()
-                    .map(|s| s.to_owned())
-                    .ok_or("Failed to find avatar_url")?,
+                v["avatar_url"] //get value from the array parsed
+                    .as_str() //returns an option some if there is a string none if not
+                    .map(|s| s.to_owned()) // If there is an &str in Some, it will call to_owned to convert to String. If not map keeps it as None
+                    .ok_or("Failed to find avatar_url")?, //converts this thing to a result if there is a Some(String) in it it will be Ok(Srting) if None -> Err. ? will unwrap or propagate the error
             ),
             end_point: Some(
                 v["end_point"]
@@ -65,9 +65,19 @@ impl Payload {
         })
     }
 
-    pub fn set_content(&mut self, content: String) {
-        self.content = Some(content);
+    pub fn set_content(&mut self, content: &str) {
+        self.content = Some(content.to_owned());
     } //content setter
+
+    pub fn set_endpoint(&mut self, end_point: &str) -> Result<(), &str> {
+        if self.end_point.is_none() {
+            self.end_point = Some(end_point.to_owned());
+        } else {
+            return Err("End point already set! create new payload for new endpoint");
+        }
+        self.end_point = Some(end_point.to_owned());
+        Ok(())
+    }
 
     //send message to discord should return an Error if there is no message
     pub async fn send_msg(&self) -> Result<(), &str> {
@@ -118,11 +128,26 @@ mod tests {
         assert_eq!(result, 4);
     }
 
-    //Create a payload from strings
+    //Test Payload
     #[test]
-    fn newPayload() {
-        let x = Payload::new("user_name".to_owned(), "avatar_url".to_owned());
-        assert_eq!(x.user_name, "user_name");
-        assert_eq!(x.avatar_url.unwrap(), "avatar_url")
+    fn new_payload() {
+        let mut x = Payload::new("user_name", "avatar_url");
+        assert_eq!(&x.user_name, "user_name");
+        assert_eq!(&x.avatar_url.clone().unwrap(), "avatar_url");
+        assert!(&x.end_point.is_none());
+
+        //set endpoint
+        assert!(x.set_endpoint("www.google.com").is_ok());
+        assert_eq!(&x.end_point.clone().unwrap(), "www.google.com");
+        assert!(x.set_endpoint("www.noogle.com").is_err());
+
+        //content test
+        assert!(&x.content.is_none());
+        x.set_content("There once was a man from venus");
+        assert!(&x.content.is_some());
+        assert_eq!(
+            &x.content.clone().unwrap(),
+            "There once was a man from venus"
+        );
     }
 }
