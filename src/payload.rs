@@ -21,12 +21,12 @@ pub struct Payload {
 impl Payload {
     // Constructor that takes user name and avatar url
     #[allow(dead_code)]
-    pub fn new(user_name: &str, avatar_url: &str) -> Payload {
+    pub fn new(end_point: &str, user_name: &str, avatar_url: &str) -> Payload {
         Payload {
             user_name: user_name.to_owned(),
             content: None,
             avatar_url: Some(avatar_url.to_owned()),
-            end_point: None,
+            end_point: Some(end_point.to_owned()),
         }
     }
 
@@ -121,7 +121,6 @@ impl Payload {
 #[cfg(test)]
 mod tests {
     use super::Payload;
-
     #[test]
     fn it_works() {
         let result = 2 + 2;
@@ -131,14 +130,12 @@ mod tests {
     //Test Payload
     #[test]
     fn new_payload() {
-        let mut x = Payload::new("user_name", "avatar_url");
+        let mut x = Payload::new("www.oogle.com", "user_name", "avatar_url");
         assert_eq!(&x.user_name, "user_name");
         assert_eq!(&x.avatar_url.clone().unwrap(), "avatar_url");
-        assert!(&x.end_point.is_none());
+        assert_eq!(&x.end_point.clone().unwrap(), "www.oogle.com");
 
         //set endpoint
-        assert!(x.set_endpoint("www.google.com").is_ok());
-        assert_eq!(&x.end_point.clone().unwrap(), "www.google.com");
         assert!(x.set_endpoint("www.noogle.com").is_err());
 
         //content test
