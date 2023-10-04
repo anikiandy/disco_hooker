@@ -29,10 +29,29 @@ impl HookManager {
         }
     }
 
+    // Sets the message to be sent
+    pub fn set_message(&mut self, message: &str) {
+        match self.message {
+            None => {
+                // If it's None, set it to Some and tell them
+                self.message = Some(message.to_owned());
+                println!("Set message");
+            }
+            Some(_) => {
+                // If it's Some that means it has been set already but not sent so print that
+                self.message = Some(message.to_owned());
+                println!("Replaced unsent message");
+            }
+        }
+    }
+
     // Function will send all the messages if there is a message is not None
     pub async fn send_messages(&mut self) -> Result<(), String> {
         if self.message.is_none() {
             return Err("No message to send".to_owned());
+        }
+        for hook in self.hooks.iter_mut() {
+            hook.set_content(self.message.clone().unwrap().as_str());
         }
         let futures: Vec<_> = self
             .hooks
@@ -47,7 +66,7 @@ impl HookManager {
             }
         }
         //if we sent the message clear the message field so we dont double send
-        self.message=None;
+        self.message = None;
         Ok(())
     } // send_massages
 }
@@ -87,7 +106,7 @@ mod tests {
     } // hook push test
 
     #[tokio::test]
-    async fn send_messages(){
+    async fn send_messages() {
         let mut manager = HookManager::new(
             "andy",
             "https://i.etsystatic.com/6048333/r/il/3e80f0/2362984696/il_570xN.2362984696_kn27.jpg",
@@ -98,6 +117,14 @@ mod tests {
         manager.add_hook("https://discordapp.com/api/webhooks/1158622386074173500/h_I4fowNiVDtJmwSV3sqE6M1V6yxZpgsezBuuPQ5df9d3SXrQeSxHtZSG7DWma8hvGYk");
 
         // message not set should fail
-        assert!(manager.send_messages().await.is_err())
+        assert!(manager.send_messages().await.is_err());
+
+        //set message
+        manager.set_message("This is a mesage");
+        // Send message should be ok
+        assert!(manager.send_messages().await.is_ok());
+
+        // attempt to send again should fail because we are supposed to unset the message after its sent
+        assert!(manager.send_messages().await.is_err());
     } // send messages test
 }
