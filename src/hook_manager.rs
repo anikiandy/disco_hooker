@@ -126,5 +126,9 @@ mod tests {
 
         // attempt to send again should fail because we are supposed to unset the message after its sent
         assert!(manager.send_messages().await.is_err());
+
+        //add another message
+        manager.set_message("This is a more different message");
+        assert!(manager.send_messages().await.is_ok());
     } // send messages test
 }

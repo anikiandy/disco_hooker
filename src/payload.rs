@@ -69,7 +69,7 @@ impl Payload {
         self.content = Some(content.to_owned());
     } //content setter
 
-/*     pub fn set_endpoint(&mut self, end_point: &str) -> Result<(), &str> {
+    /*     pub fn set_endpoint(&mut self, end_point: &str) -> Result<(), &str> {
         if self.end_point.is_none() {
             self.end_point = Some(end_point.to_owned());
         } else {
@@ -136,7 +136,7 @@ mod tests {
         assert_eq!(&x.end_point.clone().unwrap(), "www.oogle.com");
 
         //set endpoint
-      //  assert!(x.set_endpoint("www.noogle.com").is_err());
+        //  assert!(x.set_endpoint("www.noogle.com").is_err());
 
         //content test
         assert!(&x.content.is_none());
