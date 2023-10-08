@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 use super::payload;
+use crate::disco_hook;
+use async_trait::async_trait;
 
 //Hook_manager holds multiple payloads of various enpoints. It also stores common user name, avatar_url, and message to enable sending multiple messages
 pub struct HookManager {
@@ -7,6 +9,13 @@ pub struct HookManager {
     message: Option<String>,      //  Message
     avatar: Option<String>,       //avatar_url that new hooks will be created with
     user: Option<String>,         // user_name that new hooks will be created with
+}
+
+#[async_trait]
+impl disco_hook::disco_hook<String> for HookManager {
+    async fn send_hook(&mut self) -> Result<(), String> {
+        self.send_messages().await
+    }
 }
 
 impl HookManager {
