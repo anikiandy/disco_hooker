@@ -1,10 +1,3 @@
-/*
-TODOS:
-1. Change to test file instead of main driver
-2. Replace Unwraps in new_from_json to handle errors
-3. New from json should return a result incase there is a parsing error
-*/
-
 use crate::disco_hook;
 use async_trait::async_trait;
 use serde::Deserialize;
@@ -132,9 +125,6 @@ mod tests {
         assert_eq!(&x.user_name, "user_name");
         assert_eq!(&x.avatar_url.clone().unwrap(), "avatar_url");
         assert_eq!(&x.end_point.clone().unwrap(), "www.oogle.com");
-
-        //set endpoint
-        //  assert!(x.set_endpoint("www.noogle.com").is_err());
 
         //content test
         assert!(&x.content.is_none());
