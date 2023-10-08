@@ -5,11 +5,11 @@ TODOS:
 3. New from json should return a result incase there is a parsing error
 */
 
+use crate::disco_hook;
+use async_trait::async_trait;
 use serde::Deserialize;
 use serde_json::Value;
 use std::fs;
-use async_trait::async_trait;
-use crate::disco_hook;
 
 #[derive(Deserialize, Debug)]
 pub struct Payload {
@@ -20,8 +20,8 @@ pub struct Payload {
     end_point: Option<String>,
 }
 #[async_trait]
-impl disco_hook::DiscoHook<String> for Payload{
-    async fn send_hook(&mut self) -> Result<(),String>{
+impl disco_hook::DiscoHook<String> for Payload {
+    async fn send_hook(&mut self) -> Result<(), String> {
         self.send_msg().await
     }
 }
@@ -76,7 +76,6 @@ impl Payload {
     pub fn set_content(&mut self, content: &str) {
         self.content = Some(content.to_owned());
     } //content setter
-
 
     //send message to discord should return an Error if there is no message
     pub async fn send_msg(&self) -> Result<(), String> {
@@ -135,7 +134,7 @@ mod tests {
         assert_eq!(&x.end_point.clone().unwrap(), "www.oogle.com");
 
         //set endpoint
-      //  assert!(x.set_endpoint("www.noogle.com").is_err());
+        //  assert!(x.set_endpoint("www.noogle.com").is_err());
 
         //content test
         assert!(&x.content.is_none());
