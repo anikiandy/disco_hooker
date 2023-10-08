@@ -8,6 +8,8 @@ TODOS:
 use serde::Deserialize;
 use serde_json::Value;
 use std::fs;
+use async_trait::async_trait;
+use crate::disco_hook;
 
 #[derive(Deserialize, Debug)]
 pub struct Payload {
@@ -16,6 +18,12 @@ pub struct Payload {
     // title: Option<String>,
     avatar_url: Option<String>,
     end_point: Option<String>,
+}
+#[async_trait]
+impl disco_hook::DiscoHook<String> for Payload{
+    async fn send_hook(&mut self) -> Result<(),String>{
+        self.send_msg().await
+    }
 }
 
 impl Payload {
@@ -31,16 +39,16 @@ impl Payload {
     }
 
     //fn to take a config file to setup the payload with the endpoint and user and user avatar
-    pub fn new_from_json(file_path: &str) -> Result<Payload, &str> {
+    pub fn new_from_json(file_path: &str) -> Result<Payload, String> {
         let v: Value;
 
         if let Ok(s) = fs::read_to_string(file_path) {
             v = match serde_json::from_str(&s) {
                 Ok(value) => value,
-                Err(_) => return Err("Failed to parse JSON"),
+                Err(_) => return Err("Failed to parse JSON".to_owned()),
             };
         } else {
-            return Err("Failed to read json");
+            return Err("Failed to read json".to_owned());
         }
 
         Ok(Payload {
@@ -69,24 +77,15 @@ impl Payload {
         self.content = Some(content.to_owned());
     } //content setter
 
-    /*     pub fn set_endpoint(&mut self, end_point: &str) -> Result<(), &str> {
-        if self.end_point.is_none() {
-            self.end_point = Some(end_point.to_owned());
-        } else {
-            return Err("End point already set! create new payload for new endpoint");
-        }
-        self.end_point = Some(end_point.to_owned());
-        Ok(())
-    } */
 
     //send message to discord should return an Error if there is no message
-    pub async fn send_msg(&self) -> Result<(), &str> {
+    pub async fn send_msg(&self) -> Result<(), String> {
         //return err if there is no content
         if self.content.is_none() {
-            return Err("No message content set");
+            return Err("No message content set".to_owned());
         } else if self.end_point.is_none() {
             // Check if there is an endpoint
-            return Err("No endpoint set");
+            return Err("No endpoint set".to_owned());
         }
 
         // Send with reqwest
@@ -98,7 +97,7 @@ impl Payload {
             .send()
             .await;
         if res.is_err() {
-            return Err("Recieved request error");
+            return Err("Recieved request error".to_owned());
         }
 
         Ok(())
@@ -136,7 +135,7 @@ mod tests {
         assert_eq!(&x.end_point.clone().unwrap(), "www.oogle.com");
 
         //set endpoint
-        //  assert!(x.set_endpoint("www.noogle.com").is_err());
+      //  assert!(x.set_endpoint("www.noogle.com").is_err());
 
         //content test
         assert!(&x.content.is_none());
